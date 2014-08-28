@@ -1,0 +1,5 @@
+.
+https://github.com/adarqui/Abstract-Interfaces
+https://github.com/adarqui/Abstract-Impl-Libs
+https://github.com/adarqui/Abstract-Impl-Redis
+https://github.com/adarqui/Abstract-Impl-Memcache
