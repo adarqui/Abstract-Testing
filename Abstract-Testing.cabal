@@ -16,8 +16,6 @@ synopsis:               Abstract
 
 Library
  hs-source-dirs:        src
- exposed-modules:
-                        Abstract.Testing
-
- build-depends:         base >= 3 && <5, Abstract-Interfaces, Abstract-Impl-Libs, Abstract-Impl-Redis, Abstract-Impl-Memcache
+ exposed-modules:       Abstract.Testing.Counter
+ build-depends:         base >= 3 && <5, async, Abstract-Interfaces, Abstract-Impl-Libs, Abstract-Impl-Memcache
  ghc-options:           -Wall -rtsopts
