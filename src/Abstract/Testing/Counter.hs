@@ -10,21 +10,29 @@ import Abstract.Impl.Libs.Counter
   mkCounter'IORef, mkCounter'IORef'Inc, mkCounter'IORef'Dec, mkCounter'IORef'Get
  )
 
---import qualified Abstract.Impl.Libs.Counter.MVar.Internal as LCM
-
 import Control.Concurrent
 import Control.Concurrent.Async
 import Control.Monad
 
-counters = do
- mapM (\f -> f 0) $ [mkCounter'MVar "mvar counter"]
+-- hideous
 
-runCounterTests ctr threads maxN = do
+runCounterTests threads maxN = do
+ mvar <- mkCounter'MVar "mvar counter" 0
+ _ <- runCounterTests' mvar threads maxN
+ ior <- mkCounter'IORef "ioref counter" 0
+ _ <- runCounterTests' ior threads maxN
+ red <- mkCounter'IORef "redis counter" 0
+ _ <- runCounterTests' red threads maxN
+ return ()
+
+runCounterTests' ctr threads maxN = do
+ _ <- reset ctr
  a1 <- async (forM_ [1..threads] (\_ -> runCounterTest ctr maxN))
  w <- wait a1
- result <- get ctr
- putStrLn $ "done: " ++ show result
- return ()
+ (Just result) <- get ctr
+ case (result == (threads * maxN)) of
+  True -> putStrLn "success" >> return ()
+  False -> error $ "Fail: " ++ (show (threads * maxN)) ++ " /= " ++ show result
 
 runCounterTest ctr n = do
  forM_ [1..n] $ \_ -> incr ctr
