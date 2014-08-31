@@ -3,22 +3,9 @@ module Abstract.Testing.Counter (
 ) where
 
 import Abstract.Interfaces.Counter
-
 import Abstract.Impl.Libs.Counter
- (
-  mkCounter'MVar, mkCounter'MVar'Inc, mkCounter'MVar'Dec, mkCounter'MVar'Get,
-  mkCounter'IORef, mkCounter'IORef'Inc, mkCounter'IORef'Dec, mkCounter'IORef'Get
- )
-
 import Abstract.Impl.Redis.Counter
- (
-  mkCounter'Redis'Int, mkCounter'Redis'Int'Inc, mkCounter'Redis'Int'Dec, mkCounter'Redis'Int'Get, defaultCounterRedis'Int
- )
-
 import Abstract.Impl.Memcache.Counter
- (
-  mkCounter'Memcache'Int, defaultCounterMemcache'Int
- )
 
 import Control.Concurrent
 import Control.Concurrent.Async
@@ -48,7 +35,7 @@ runCounterTests' s ctr threads maxN = do
 
 test'incr ctr threads maxN = do
  a1 <- async (forM_ [1..threads] (\_ -> forM_ [1..maxN] $ \_ -> incr ctr))
- w <- wait a1
+ _ <- wait a1
  (Just result) <- get ctr
  case (result == (threads * maxN)) of
   True -> putStrLn "test'incr: success" >> return ()
@@ -56,7 +43,7 @@ test'incr ctr threads maxN = do
 
 test'incrBy ctr threads maxN = do
  a1 <- async (forM_ [1..threads] (\_ -> incrBy ctr maxN >> return ()))
- w <- wait a1
+ _ <- wait a1
  (Just result) <- get ctr
  case (result == (threads * maxN)) of
   True -> putStrLn "test'incrBy: success" >> return ()
