@@ -14,6 +14,7 @@ import Data.List
 
 import qualified Data.ByteString.Char8 as B
 
+
 intStacks = [
   ("redis", mkStack'Redis (defaultStackRedis "queue" B.pack B.unpack))
  ]

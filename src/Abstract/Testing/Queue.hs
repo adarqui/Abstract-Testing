@@ -3,11 +3,14 @@ module Abstract.Testing.Queue (
  runQueueTests
 ) where
 
+import Abstract.Testing.Misc
 import Abstract.Interfaces.Queue
 import Abstract.Impl.Redis.Queue
 
 import Control.Concurrent
 import Control.Concurrent.Async
+import Control.Concurrent.STM
+import Control.Exception
 import Control.Monad
 
 import Data.List
@@ -41,8 +44,9 @@ runQueueTests' s q threads maxN = do
 
 
 test'enqueue q threads maxN = do
- a1 <- async (forM_ [1..threads] (\_ -> forM_ [1..maxN] $ \n -> enqueue q (show n)))
- _ <- wait a1
+ tc <- atomically $ newTVar threads
+ forM_ [1..threads] (\_ -> forkIO $ (forM_ [1..maxN] $ \n -> enqueue q (show n)) `finally` atomReplace (\x -> x - 1) tc)
+ atomically $ readTVar tc >>= \x -> if x == 0 then return () else retry
  sz <- size q
  case (sz == (threads * maxN)) of
   True -> putStrLn "test'enqueue: success"

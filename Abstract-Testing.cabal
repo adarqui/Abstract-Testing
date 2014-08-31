@@ -20,5 +20,26 @@ Library
                         Abstract.Testing.Counter
                         Abstract.Testing.Queue
                         Abstract.Testing.Stack
- build-depends:         base >= 3 && <5, bytestring, async, Abstract-Interfaces, Abstract-Impl-Libs, Abstract-Impl-Redis, Abstract-Impl-Memcache
+
+                        Abstract.Testing.Misc
+
+ build-depends:         base >= 3 && <5, bytestring, async, stm, Abstract-Interfaces, Abstract-Impl-Libs, Abstract-Impl-Redis, Abstract-Impl-Memcache
  ghc-options:           -Wall -rtsopts
+
+Executable "run-counter-tests"
+ main-is:               run-counter-tests.hs
+ hs-source-dirs:        examples
+ build-depends:         base >= 3 && <5, bytestring, async, stm, Abstract-Interfaces, Abstract-Impl-Libs, Abstract-Impl-Redis, Abstract-Impl-Memcache, Abstract-Testing
+ GHC-Options:           -threaded -O2 -rtsopts -Wall
+
+Executable "run-queue-tests"
+ main-is:               run-queue-tests.hs
+ hs-source-dirs:        examples
+ build-depends:         base >= 3 && <5, bytestring, async, stm, Abstract-Interfaces, Abstract-Impl-Libs, Abstract-Impl-Redis, Abstract-Impl-Memcache, Abstract-Testing
+ GHC-Options:           -threaded -O2 -rtsopts -Wall
+
+Executable "run-stack-tests"
+ main-is:               run-stack-tests.hs
+ hs-source-dirs:        examples
+ build-depends:         base >= 3 && <5, bytestring, async, stm, Abstract-Interfaces, Abstract-Impl-Libs, Abstract-Impl-Redis, Abstract-Impl-Memcache, Abstract-Testing
+ GHC-Options:           -threaded -O2 -rtsopts -Wall
