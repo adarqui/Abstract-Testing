@@ -24,14 +24,20 @@ import Control.Concurrent
 import Control.Concurrent.Async
 import Control.Monad
 
-intCounters = [mkCounter'MVar 0, mkCounter'IORef 0, mkCounter'Redis'Int 0 (defaultCounterRedis'Int "counter"), mkCounter'Memcache'Int 0 (defaultCounterMemcache'Int "counter")]
+intCounters = [
+  ("mvar", mkCounter'MVar 0),
+  ("ioref", mkCounter'IORef 0),
+  ("redis", mkCounter'Redis'Int 0 (defaultCounterRedis'Int "counter")),
+  ("memcache", mkCounter'Memcache'Int 0 (defaultCounterMemcache'Int "counter"))
+ ]
 
 runCounterTests threads maxN = do
- forM_ intCounters (\f -> f >>= \ctr -> runCounterTests' "" ctr threads maxN)
+ forM_ intCounters
+  (\(name, mk) -> mk >>= \ctr -> runCounterTests' name ctr threads maxN)
  return ()
 
 runCounterTests' s ctr threads maxN = do
- putStrLn $ "test: " ++ s
+ putStrLn $ "----- testing: " ++ s
  _ <- reset ctr
  test'incr ctr threads maxN
  _ <- reset ctr
