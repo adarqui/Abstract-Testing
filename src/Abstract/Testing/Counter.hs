@@ -12,22 +12,22 @@ import Abstract.Impl.Libs.Counter
 
 import Abstract.Impl.Redis.Counter
  (
-  mkCounter'Redis'Int, mkCounter'Redis'Int'Inc, mkCounter'Redis'Int'Dec, mkCounter'Redis'Int'Get, defaultCounterRedisWrapper'Int
+  mkCounter'Redis'Int, mkCounter'Redis'Int'Inc, mkCounter'Redis'Int'Dec, mkCounter'Redis'Int'Get, defaultCounterRedis'Int
+ )
+
+import Abstract.Impl.Memcache.Counter
+ (
+  mkCounter'Memcache'Int, defaultCounterMemcache'Int
  )
 
 import Control.Concurrent
 import Control.Concurrent.Async
 import Control.Monad
 
--- hideous
+intCounters = [mkCounter'MVar 0, mkCounter'IORef 0, mkCounter'Redis'Int 0 (defaultCounterRedis'Int "counter"), mkCounter'Memcache'Int 0 (defaultCounterMemcache'Int "counter")]
 
 runCounterTests threads maxN = do
- mvar <- mkCounter'MVar 0
- _ <- runCounterTests' "mvar" mvar threads maxN
- ior <- mkCounter'IORef 0
- _ <- runCounterTests' "ioref" ior threads maxN
- red <- mkCounter'Redis'Int 0 (defaultCounterRedisWrapper'Int "counter")
- _ <- runCounterTests' "redis" red threads maxN
+ forM_ intCounters (\f -> f >>= \ctr -> runCounterTests' "" ctr threads maxN)
  return ()
 
 runCounterTests' s ctr threads maxN = do
