@@ -3,11 +3,14 @@ module Abstract.Testing.Stack (
  runStackTests
 ) where
 
+import Abstract.Testing.Misc
 import Abstract.Interfaces.Stack
 import Abstract.Impl.Redis.Stack
 
 import Control.Concurrent
 import Control.Concurrent.Async
+import Control.Concurrent.STM
+import Control.Exception
 import Control.Monad
 
 import Data.List
@@ -28,10 +31,10 @@ runStackTests' s q threads maxN = do
  putStrLn $ "----- testing: " ++ s
  test'destroy q
  test'push q threads maxN
- test'pop q "10"
+ test'pop q $ show maxN
  test'destroy q
  test'pushBatch q big_data
- test'pop q "10"
+ test'pop q $ show maxN
  test'destroy q
  test'push q threads maxN
  test'drain q big_data
@@ -42,8 +45,9 @@ runStackTests' s q threads maxN = do
 
 
 test'push q threads maxN = do
- a1 <- async (forM_ [1..threads] (\_ -> forM_ [1..maxN] $ \n -> push q (show n)))
- _ <- wait a1
+ tc <- atomically $ newTVar threads
+ forM_ [1..threads] (\_ -> forkIO $ (forM_ [1..maxN] $ \n -> push q (show n)) `finally` atomDecr tc)
+ atomRetry'IfZero tc
  sz <- size q
  case (sz == (threads * maxN)) of
   True -> putStrLn "test'push: success"

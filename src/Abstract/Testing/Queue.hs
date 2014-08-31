@@ -17,6 +17,7 @@ import Data.List
 
 import qualified Data.ByteString.Char8 as B
 
+
 intQueues = [
   ("redis", mkQueue'Redis (defaultQueueRedis "queue" B.pack B.unpack))
  ]
@@ -45,8 +46,8 @@ runQueueTests' s q threads maxN = do
 
 test'enqueue q threads maxN = do
  tc <- atomically $ newTVar threads
- forM_ [1..threads] (\_ -> forkIO $ (forM_ [1..maxN] $ \n -> enqueue q (show n)) `finally` atomReplace (\x -> x - 1) tc)
- atomically $ readTVar tc >>= \x -> if x == 0 then return () else retry
+ forM_ [1..threads] (\_ -> forkIO $ (forM_ [1..maxN] $ \n -> enqueue q (show n)) `finally` atomDecr tc)
+ atomRetry'IfZero tc
  sz <- size q
  case (sz == (threads * maxN)) of
   True -> putStrLn "test'enqueue: success"
