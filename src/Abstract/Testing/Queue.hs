@@ -6,6 +6,7 @@ module Abstract.Testing.Queue (
 import Abstract.Testing.Misc
 import Abstract.Interfaces.Queue
 import Abstract.Impl.Redis.Queue
+import Abstract.Impl.Libs.Queue
 
 import Control.Concurrent
 import Control.Concurrent.Async
@@ -19,7 +20,8 @@ import qualified Data.ByteString.Char8 as B
 
 
 intQueues = [
-  ("redis", mkQueue'Redis (defaultQueueRedis "queue" B.pack B.unpack))
+  ("redis", mkQueue'Redis (defaultQueueRedis "queue" B.pack B.unpack)),
+  ("chan", mkQueue'Chan)
  ]
 
 runQueueTests threads maxN = do
@@ -49,6 +51,7 @@ test'enqueue q threads maxN = do
  forM_ [1..threads] (\_ -> forkIO $ (forM_ [1..maxN] $ \n -> enqueue q (show n)) `finally` atomDecr tc)
  atomRetry'IfZero tc
  sz <- size q
+ print sz
  case (sz == (threads * maxN)) of
   True -> putStrLn "test'enqueue: success"
   False -> error $ "test'enqueue: fail: " ++ (show (threads * maxN)) ++ " /= " ++ show sz
